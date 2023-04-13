@@ -1,0 +1,58 @@
+drop table post_offices_India;
+CREATE TABLE post_offices_India(OFFICE_NAME STRING,OFFICE_STATUS STRING,PINCODE INT,TELEPHONE BIGINT,
+TALUK STRING,DISTRICT STRING,STATE STRING,POSTAL_DIVISION STRING,POSTAL_REGION STRING,POSTAL_CIRCLE STRING
+)
+ROW FORMAT DELIMITED FIELDS TERMINATED BY ','
+
+
+load data local inpath '/home/cloudera/Documents/hiveex/partitions/All_States_PinCode.csv'
+into table post_offices_India
+
+drop table india_post_offices_statewise;
+
+CREATE TABLE india_post_offices_statewise(OFFICE_NAME STRING,OFFICE_STATUS STRING,PINCODE INT,TELEPHONE BIGINT,
+TALUK STRING,DISTRICT STRING,POSTAL_DIVISION STRING,POSTAL_REGION STRING,POSTAL_CIRCLE STRING
+)
+
+PARTITIONED BY (STATE STRING) 
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY ','
+
+
+
+SET hive.exec.dynamic.partition = true;
+set hive.exec.dynamic.partition.mode=nonstrict;
+
+
+INSERT OVERWRITE TABLE india_post_offices_statewise PARTITION (STATE)
+SELECT OFFICE_NAME,OFFICE_STATUS, PINCODE, TELEPHONE, TALUK , DISTRICT, STATE,POSTAL_DIVISION ,POSTAL_REGION,POSTAL_CIRCLE from post_offices_India
+
+Dynamic partitions:
+
+table x is not partitioned table
+table y is partititioned table
+we are loading the data from table x to table y.
+
+to enable dynamic partition:
+
+SET hive.exec.dynamic.partition = true;
+set hive.exec.dynamic.partition.mode=nonstrict;
+
+INSERT OVERWRITE TABLE table2(STATE)
+SELECT OFFICE_NAME,OFFICE_STATUS, PINCODE, TELEPHONE, TALUK , DISTRICT, STATE,POSTAL_DIVISION ,POSTAL_REGION,POSTAL_CIRCLE from table1
+
+select count(*) from india_post_offices_statewise where state='KARNATAKA';
+
+
+
+CREATE external TABLE ext_india_post_offices_statewise(OFFICE_NAME STRING,OFFICE_STATUS STRING,PINCODE INT,TELEPHONE BIGINT,
+TALUK STRING,DISTRICT STRING,POSTAL_DIVISION STRING,POSTAL_REGION STRING,POSTAL_CIRCLE STRING
+)
+
+PARTITIONED BY (STATE STRING) 
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY ','
+location '/user/cloudera/ext_india_post_offices_statewise'
+
+
+
